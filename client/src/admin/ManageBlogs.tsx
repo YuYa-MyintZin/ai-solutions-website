@@ -5,12 +5,14 @@ interface Blog {
   _id: string;
   title: string;
   content: string;
+  image?: string;
 }
 
 const ManageBlogs: React.FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [image, setImage] = useState<File | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
 
   const token = localStorage.getItem('adminToken');
@@ -29,21 +31,34 @@ const ManageBlogs: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const blogData = { title, content };
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    if (image) {
+      formData.append('image', image);
+    }
 
     if (editId) {
-      await axios.put(`http://localhost:5000/api/admin/blogs/${editId}`, blogData, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.put(`http://localhost:5000/api/admin/blogs/${editId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
+      
       setEditId(null);
     } else {
-      await axios.post('http://localhost:5000/api/admin/blogs', blogData, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.post('http://localhost:5000/api/admin/blogs', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
       });
     }
 
     setTitle('');
     setContent('');
+    setImage(null);
     fetchBlogs();
   };
 
@@ -80,6 +95,12 @@ const ManageBlogs: React.FC = () => {
           className="w-full border px-4 py-2 rounded"
           required
         />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files?.[0] || null)}
+          className="w-full border p-2 rounded"
+        />
         <button
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -88,24 +109,33 @@ const ManageBlogs: React.FC = () => {
         </button>
       </form>
 
-      <ul className="space-y-2">
+      <ul className="space-y-4">
         {blogs.map((blog) => (
-          <li key={blog._id} className="border p-4 rounded shadow">
-            <h3 className="font-semibold">{blog.title}</h3>
-            <p>{blog.content}</p>
-            <div className="mt-2 space-x-2">
-              <button
-                onClick={() => handleEdit(blog)}
-                className="text-blue-600 hover:underline"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(blog._id)}
-                className="text-red-600 hover:underline"
-              >
-                Delete
-              </button>
+          <li key={blog._id} className="border p-4 rounded shadow flex gap-4">
+            {blog.image && (
+              <img
+                src={`http://localhost:5000/${blog.image}`}
+                alt="blog"
+                className="w-40 h-32 object-cover rounded"
+              />
+            )}
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg">{blog.title}</h3>
+              <p className="text-sm">{blog.content}</p>
+              <div className="mt-2 space-x-2">
+                <button
+                  onClick={() => handleEdit(blog)}
+                  className="text-blue-600 hover:underline"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(blog._id)}
+                  className="text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </li>
         ))}

@@ -4,7 +4,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
 const authRoutes = require('./routes/authRoutes');
-
+const blogRoutes = require('./routes/blogRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 dotenv.config();
 
 const app = express();
@@ -13,6 +15,11 @@ app.use(express.json());
 
 // API routes
 app.use('/api/admin', authRoutes);
+app.use('/api/admin/blogs', blogRoutes);  
+app.use('/uploads', express.static('uploads'));
+app.use('/api/admin/events', eventRoutes);
+app.use('/api/customer/contact', contactRoutes);
+
 
 // Connect to MongoDB and start server
 mongoose
