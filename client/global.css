@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer utilities {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  .full-size {
+    @apply w-full h-full;
+  }
+
+  .screen-size {
+    @apply w-screen h-screen;
+  }
+}
